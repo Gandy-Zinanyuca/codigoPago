@@ -21,6 +21,7 @@ export async function POST(req) {
       );
     }
 
+<<<<<<< HEAD
     console.log(`📋 Creando campaña "${nombre_campanha}" con ${clients.length} clientes`);
 
     // 1. Preparar datos de la campaña
@@ -45,11 +46,29 @@ export async function POST(req) {
     // Crear la campaña
     const campanha = await prisma.campanha.create({
       data: campanhaData,
+=======
+    console.log(`📋 Creando campaña con ${clients.length} clientes`);
+
+    // 1. Crear la campaña
+    const campanha = await prisma.campanha.create({
+      data: {
+        nombre_campanha,
+        descripcion: descripcion || "Sin descripción",
+        template_id: template_id ? parseInt(template_id) : null,
+        fecha_inicio: fecha_inicio ? new Date(fecha_inicio) : new Date(),
+        fecha_fin: fecha_fin ? new Date(fecha_fin) : null,
+        variable_mappings: variableMappings || {},
+        estado_campanha: "activa",
+        num_clientes: clients.length,
+        tipo: "in",
+      },
+>>>>>>> 827b2e6 (cambios nuevos)
     });
 
     console.log(`✅ Campaña creada con ID: ${campanha.campanha_id}`);
 
     // 2. Preparar datos para guardar en campanha_temporal
+<<<<<<< HEAD
     const dataToInsert = clients
       .map((cliente) => {
         // Normalizar el número de teléfono
@@ -78,11 +97,45 @@ export async function POST(req) {
     // 3. Guardar clientes en campanha_temporal
     let result = { count: 0 };
 
+=======
+    const dataToInsert = clients.map((cliente) => {
+      // Normalizar el número de teléfono
+      let celular = cliente.celular || cliente.telefono || "";
+      
+      if (celular) {
+        // Remover espacios y caracteres no numéricos excepto +
+        celular = celular.toString().replace(/\s+/g, "").trim();
+        
+        // Agregar +51 si no tiene prefijo
+        if (!celular.startsWith("+")) {
+          celular = `+51${celular}`;
+        }
+      }
+
+      return {
+        campanha_id: campanha.campanha_id,
+        celular: celular || null,
+        nombre: cliente.nombre || cliente.Nombre || null,
+      };
+    }).filter(c => c.celular); // Solo los que tienen celular válido
+
+    console.log(`📞 Clientes válidos: ${dataToInsert.length}`);
+
+    // 3. Guardar clientes en campanha_temporal
+    let result = { count: 0 };
+    
+>>>>>>> 827b2e6 (cambios nuevos)
     if (dataToInsert.length > 0) {
       result = await prisma.campanha_temporal.createMany({
         data: dataToInsert,
         skipDuplicates: true,
       });
+<<<<<<< HEAD
+=======
+      
+      console.log(`✅ ${result.count} clientes guardados en campanha_temporal`);
+    }
+>>>>>>> 827b2e6 (cambios nuevos)
 
       console.log(`✅ ${result.count} clientes guardados en campanha_temporal`);
     }
@@ -106,8 +159,12 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("❌ Error al crear campaña:", error);
+<<<<<<< HEAD
     console.error("❌ Detalles:", error.message);
 
+=======
+    
+>>>>>>> 827b2e6 (cambios nuevos)
     return NextResponse.json(
       {
         error: "Error al crear la campaña o agregar los clientes",
